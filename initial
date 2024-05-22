@@ -1,0 +1,82 @@
+import pygame
+import random
+
+# Initialize pygame
+pygame.init()
+
+# Screen dimensions
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+# Colors
+BLACK = (0, 0, 0)
+YELLOW = (255, 255, 0)
+WHITE = (255, 255, 255)
+
+# Screen setup
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Pacman")
+
+# Clock to control the frame rate
+clock = pygame.time.Clock()
+
+# Load the Pacman image
+pacman_image = pygame.image.load("pacman.png")
+pacman_image = pygame.transform.scale(pacman_image, (50, 50))
+pacman_rect = pacman_image.get_rect()
+pacman_rect.x = SCREEN_WIDTH // 2
+pacman_rect.y = SCREEN_HEIGHT // 2
+
+# Movement speed
+pacman_speed = 5
+
+# Food
+food_size = 20
+food_positions = [(random.randint(0, SCREEN_WIDTH - food_size), random.randint(0, SCREEN_HEIGHT - food_size)) for _ in range(20)]
+
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        pacman_rect.x -= pacman_speed
+    if keys[pygame.K_RIGHT]:
+        pacman_rect.x += pacman_speed
+    if keys[pygame.K_UP]:
+        pacman_rect.y -= pacman_speed
+    if keys[pygame.K_DOWN]:
+        pacman_rect.y += pacman_speed
+
+    # Keep Pacman within the screen bounds
+    if pacman_rect.x < 0:
+        pacman_rect.x = 0
+    if pacman_rect.x > SCREEN_WIDTH - pacman_rect.width:
+        pacman_rect.x = SCREEN_WIDTH - pacman_rect.width
+    if pacman_rect.y < 0:
+        pacman_rect.y = 0
+    if pacman_rect.y > SCREEN_HEIGHT - pacman_rect.height:
+        pacman_rect.y = SCREEN_HEIGHT - pacman_rect.height
+
+    # Check for collisions with food
+    for position in food_positions[:]:
+        food_rect = pygame.Rect(position[0], position[1], food_size, food_size)
+        if pacman_rect.colliderect(food_rect):
+            food_positions.remove(position)
+
+    # Drawing
+    screen.fill(BLACK)
+
+    for position in food_positions:
+        pygame.draw.rect(screen, WHITE, (position[0], position[1], food_size, food_size))
+
+    screen.blit(pacman_image, pacman_rect)
+
+    pygame.display.flip()
+
+    clock.tick(30)
+
+pygame.quit()
